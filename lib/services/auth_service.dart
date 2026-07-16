@@ -24,9 +24,14 @@ class AuthService {
 
   Future<void> _ensureGoogleSignInInitialized() async {
     if (_googleSignInInitialized) return;
-    // If you have a web client ID / iOS client ID to pass, do it here:
-    // await _googleSignIn.initialize(clientId: '...', serverClientId: '...');
-    await _googleSignIn.initialize();
+    // Web client ID from Google Cloud Console > APIs & Services >
+    // Credentials > OAuth 2.0 Client IDs > "Web client (auto created by
+    // Google Service)". Required on Android so Credential Manager can
+    // issue an ID token Firebase will accept.
+    await _googleSignIn.initialize(
+      serverClientId:
+      '191370094637-50rj1oi2k60so3djtu2c9l4jhh02cb7l.apps.googleusercontent.com',
+    );
     _googleSignInInitialized = true;
   }
 
