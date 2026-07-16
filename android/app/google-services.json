@@ -12,7 +12,12 @@
           "package_name": "com.aaki.chatbot.ai_chatbot"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "191370094637-50rj1oi2k60so3djtu2c9l4jhh02cb7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCDUg-61PWMgZ1pDO4ivJfoaSunVQssZNU"
@@ -20,7 +25,41 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "191370094637-50rj1oi2k60so3djtu2c9l4jhh02cb7l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191370094637:android:1a1434e23e38bd1d8630a4",
+        "android_client_info": {
+          "package_name": "com.aaki.chatbot.aichatbot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "191370094637-50rj1oi2k60so3djtu2c9l4jhh02cb7l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDUg-61PWMgZ1pDO4ivJfoaSunVQssZNU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "191370094637-50rj1oi2k60so3djtu2c9l4jhh02cb7l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

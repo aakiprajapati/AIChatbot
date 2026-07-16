@@ -1,4 +1,4 @@
-package com.aaki.chatbot.ai_chatbot
+package com.aaki.chatbot.aichatbot
 
 import io.flutter.embedding.android.FlutterActivity
 
