@@ -6,24 +6,32 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 /// Wraps Firebase Auth + Google/Facebook sign-in flows.
 ///
 /// Web uses signInWithPopup for both providers instead of the native
-/// plugin flows. Reason: on web, both `google_sign_in` and
-/// `flutter_facebook_auth` can fall back to a full-page OAuth redirect
-/// through Firebase's `__/auth/handler` page. That redirect round trip
-/// depends on a `sessionStorage` flag surviving the trip to the IdP and
-/// back — which browsers with storage partitioning (Chrome's default
-/// now, Safari ITP) frequently drop, producing:
-///   "Unable to process request due to missing initial state."
-/// signInWithPopup avoids this because the app's page never navigates
-/// away; the popup communicates back over postMessage instead.
+/// plugin flows, to avoid Firebase's "missing initial state" error
+/// caused by browser storage partitioning breaking the redirect flow.
+///
+/// google_sign_in v7 note: the plugin is now a singleton
+/// (GoogleSignIn.instance) that must be initialize()'d exactly once
+/// before use, and authentication/authorization are separate calls
+/// (authenticate() replaces the old signIn(); the access token comes
+/// from authorizationClient, not from the authentication result).
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _googleSignInInitialized = false;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
   User? get currentUser => _auth.currentUser;
 
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (_googleSignInInitialized) return;
+    // If you have a web client ID / iOS client ID to pass, do it here:
+    // await _googleSignIn.initialize(clientId: '...', serverClientId: '...');
+    await _googleSignIn.initialize();
+    _googleSignInInitialized = true;
+  }
+
   /// Signs in with Google. Returns the FirebaseAuth [UserCredential],
-  /// from which callers can check `additionalUserInfo?.isNewUser`.
+  /// or null if the user cancelled the flow.
   Future<UserCredential?> signInWithGoogle() async {
     if (kIsWeb) {
       final provider = GoogleAuthProvider();
@@ -31,13 +39,25 @@ class AuthService {
       return _auth.signInWithPopup(provider);
     }
 
-    final googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return null; // user cancelled
+    await _ensureGoogleSignInInitialized();
 
-    final googleAuth = await googleUser.authentication;
+    late final GoogleSignInAccount googleUser;
+    try {
+      googleUser = await _googleSignIn.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) return null;
+      rethrow;
+    }
+
+    // Authentication (identity) is synchronous in v7 and gives the ID
+    // token. The access token is a separate authorization step.
+    final idToken = googleUser.authentication.idToken;
+    final authorization = await googleUser.authorizationClient
+        .authorizationForScopes(['email']);
+
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+      idToken: idToken,
+      accessToken: authorization?.accessToken,
     );
 
     return _auth.signInWithCredential(credential);
